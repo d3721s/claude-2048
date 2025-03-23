@@ -6,6 +6,9 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QKeyEvent>
+#include <QPropertyAnimation>
+#include <QParallelAnimationGroup>
+#include <QSequentialAnimationGroup>
 #include "game2048.h"
 
 class MainWindow : public QMainWindow
@@ -18,6 +21,7 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private slots:
     void updateBoard();
@@ -30,6 +34,11 @@ private:
     QString getTileStyleSheet(int value);
     QString getTileColor(int value);
     QString getTextColor(int value);
+    void animateTileMovement(int fromRow, int fromCol, int toRow, int toCol);
+    void animateTileMerge(int row, int col);
+    void animateNewTile(int row, int col);
+    void startAnimations();
+    void calculateAnimations();
     
     Game2048 *m_game;
     QWidget *m_centralWidget;
@@ -37,6 +46,20 @@ private:
     QLabel *m_scoreLabel;
     QPushButton *m_newGameButton;
     QLabel *m_tiles[4][4];
+    
+    // 动画相关
+    QParallelAnimationGroup *m_animationGroup;
+    bool m_animationRunning;
+    QVector<QVector<int>> m_previousBoard;
+    struct TileMovement {
+        int fromRow;
+        int fromCol;
+        int toRow;
+        int toCol;
+    };
+    QList<TileMovement> m_tileMovements;
+    QList<QPair<int, int>> m_mergedTiles;
+    QList<QPair<int, int>> m_newTiles;
 };
 
 #endif // MAINWINDOW_H
